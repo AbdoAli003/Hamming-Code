@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
   char fetched_word[MAX_SIZE + 1];
   int M, K, res_len;
   int num;
-  int x = 4;
+  int x = 4; // 2^k , k = 2 initialy
   while (1) {
     x = 4;
     memset(stored_word, 0, MAX_SIZE + 1);
@@ -21,7 +21,6 @@ int main(int argc, char *argv[]) {
       continue;
     }
     handle_input(stored_word, MAX_SIZE);
-    printf("%s\n", stored_word);
     if (!check_word(stored_word)) {
 
       if (he_exit())
@@ -29,13 +28,13 @@ int main(int argc, char *argv[]) {
       continue;
     }
     M = strlen(stored_word);
-    if (M == 0)
+    if (M == 0) // if the input is empty
       continue;
     for (K = 2; x < M + K + 1; K++) {
       x *= 2;
     }
     res_len = M + K;
-    printf("K = %d, M = %d\n\n", K, M);
+    printf("K = %d, M = %d\n", K, M);
     uint *result1 = construct_result(stored_word, res_len);
     assign_parities(result1, res_len);
     printf("Word will be stored as :\n");
@@ -56,7 +55,6 @@ int main(int argc, char *argv[]) {
       else
         break;
     }
-    printf("%s\n", fetched_word);
     uint *result2 = construct_result(fetched_word, res_len);
     assign_parities(result2, res_len);
 
@@ -66,44 +64,39 @@ int main(int argc, char *argv[]) {
     printf("\n");
     uint parity[K];
     int j = 0;
-    int high;
-    int bit = 0;
+    int bit = 0; // the position of the error bit
     for (int i = 1; i <= res_len; i *= 2) {
-      parity[j] = result1[i - 1] ^ result2[i - 1];
-      high |= parity[j++];
+      parity[j++] = result1[i - 1] ^ result2[i - 1];
     }
-    for (int i = K - 1; i >= 0; i--)
-      printf("%d", parity[i]);
-    printf("\n");
-    if (!high)
-      printf("No Error occured\n");
+
+    for (int i = 0, b = 1; i < K; i++, b *= 2) {
+      bit = parity[i] ? bit + b : bit;
+    }
+    if (!bit)
+      printf("No error occured\n");
+    else if (result1[bit - 1] == result2[bit - 1])
+      printf("The error is in more than one bit!\n");
     else {
-      for (int i = 0, b = 1; i < K; i++, b *= 2) {
-        bit = parity[i] ? bit + b : bit;
-      }
-      if (result1[bit - 1] == result2[bit - 1])
-        printf("The error is in more than one bit!\n");
+      printf("Error occured at bit position : %d\n", bit);
+      if (!(bit & (bit - 1)))
+        printf("No error occured at data bit\n");
       else {
-        printf("Error occured at bit position : %d\n", bit);
-        if (!(bit & (bit - 1)))
-          printf("No error occured at data bit\n");
-        else {
-          // find the data bit position
-          int idx = 0;
-          for (int i = 0; i < bit; i++) {
-            int j = i + 1;
-            if (j & (j - 1))
-              idx++;
-          }
-          printf("Error occured at data bit %d\n", idx);
-          result2[bit - 1] = !result2[bit - 1];
-          printf("Word after correction :\n");
-          for (int i = res_len - 1; i >= 0; i--)
-            printf("%d", result2[i]);
-          printf("\n");
+        // find the data bit position
+        int idx = 0;
+        for (int i = 0; i < bit; i++) {
+          int j = i + 1;
+          if (j & (j - 1))
+            idx++;
         }
+        printf("Error occured at data bit %d\n", idx);
+        result2[bit - 1] = !result2[bit - 1];
+        printf("Word after correction :\n");
+        for (int i = res_len - 1; i >= 0; i--)
+          printf("%d", result2[i]);
+        printf("\n");
       }
     }
+    // deallocating results array
     free(result1);
     free(result2);
   }

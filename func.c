@@ -19,7 +19,7 @@ bool he_exit() {
   char c;
   printf("Would you like to exit ? (Y/n) : ");
   while (scanf("%c", &c)) {
-    getchar();
+    getchar(); // remove ebter key from buffer
     if (c == 'Y' || c == 'y')
       return true;
     if (c == 'N' || c == 'n')
