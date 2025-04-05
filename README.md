@@ -17,4 +17,6 @@ then build using make and run the program
 make
 # run the program
 ./ham
+# for deleting the executable file
+make clean
 ```
